@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Blackjack Trainer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        #game-container {
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 12px;
+            box-shadow: 3px 3px 12px rgba(0, 0, 0, 0.2);
+        }
+        #question {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: block;
+            width: 90%;
+            max-width: 350px;
+            padding: 12px;
+            margin: 10px auto;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        .btn-answer {
+            background-color: #007BFF;
+            color: white;
+        }
+        .btn-answer:hover { background-color: #0056b3; }
+        .btn-restart { background-color: #28a745; color: white; }
+        .btn-restart:hover { background-color: #1e7e34; }
+        #scoreboard, #progress {
+            font-size: 18px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Blackjack Strategy Trainer</h1>
+    
+    <div id="game-container">
+        <div id="question">Loading...</div>
+        <div id="buttons"></div>
+        <div id="scoreboard">Score: <span id="score">0</span> / 10</div>
+        <div id="progress">Hand 1 of 10</div>
+        <button class="btn btn-restart" onclick="restartGame()" style="display:none;">Restart Round</button>
+    </div>
+
+    <script>
+        const questions = [
+            // Splitting Hands (30 Hands)
+            { scenario: "You have a pair of 8s, dealer shows 6", correctAnswer: "Split" },
+            { scenario: "You have a pair of 9s, dealer shows 2", correctAnswer: "Split" },
+            { scenario: "You have a pair of 6s, dealer shows 7", correctAnswer: "Hit" },
+            { scenario: "You have a pair of 4s, dealer shows 4", correctAnswer: "Split" },
+            { scenario: "You have a pair of 5s, dealer shows 3", correctAnswer: "Double" },
+            { scenario: "You have a pair of 7s, dealer shows 8", correctAnswer: "Hit" },
+            { scenario: "You have a pair of 3s, dealer shows 4", correctAnswer: "Split" },
+            { scenario: "You have a pair of 2s, dealer shows 7", correctAnswer: "Hit" },
+            
+            // Soft Totals (30 Hands)
+            { scenario: "You have Soft 18 (A, 7), dealer shows 3", correctAnswer: "Double" },
+            { scenario: "You have Soft 15 (A, 4), dealer shows 8", correctAnswer: "Hit" },
+            { scenario: "You have Soft 17 (A, 6), dealer shows 4", correctAnswer: "Double" },
+            { scenario: "You have Soft 20 (A, 9), dealer shows 6", correctAnswer: "Stand" },
+            { scenario: "You have Soft 13 (A, 2), dealer shows 9", correctAnswer: "Hit" },
+            { scenario: "You have Soft 19 (A, 8), dealer shows 5", correctAnswer: "Double" },
+            { scenario: "You have Soft 18 (A, 7), dealer shows 5", correctAnswer: "Double" },
+
+            // Hard Totals (40+ Hands)
+            { scenario: "You have Hard 17, dealer shows 8", correctAnswer: "Stand" },
+            { scenario: "You have Hard 12, dealer shows 4", correctAnswer: "Stand" },
+            { scenario: "You have Hard 10, dealer shows 9", correctAnswer: "Double" },
+            { scenario: "You have Hard 11, dealer shows 6", correctAnswer: "Double" },
+            { scenario: "You have Hard 16, dealer shows 9", correctAnswer: "Surrender" },
+            { scenario: "You have Hard 14, dealer shows 6", correctAnswer: "Stand" },
+            { scenario: "You have Hard 9, dealer shows 7", correctAnswer: "Hit" },
+            { scenario: "You have Hard 15, dealer shows 10", correctAnswer: "Surrender" },
+
+            // More Scenarios
+            { scenario: "You have Hard 8, dealer shows 5", correctAnswer: "Hit" },
+            { scenario: "You have Hard 13, dealer shows 3", correctAnswer: "Stand" },
+            { scenario: "You have Soft 16 (A, 5), dealer shows 2", correctAnswer: "Hit" },
+            { scenario: "You have Hard 9, dealer shows 3", correctAnswer: "Double" },
+        ];
+
+        const choices = ["Hit", "Stand", "Split", "Double", "Surrender"];
+        let score = 0;
+        let questionIndex = 0;
+        let selectedQuestions = [];
+
+        function startNewRound() {
+            score = 0;
+            questionIndex = 0;
+            selectedQuestions = [...questions].sort(() => Math.random() - 0.5).slice(0, 10);
+            document.getElementById("score").innerText = score;
+            document.querySelector(".btn-restart").style.display = "none";
+            loadNextQuestion();
+        }
+
+        function loadNextQuestion() {
+            if (questionIndex >= 10) {
+                document.getElementById("question").innerText = `Round Over! You scored ${score} / 10`;
+                document.getElementById("buttons").innerHTML = "";
+                document.querySelector(".btn-restart").style.display = "block";
+                return;
+            }
+
+            let currentQuestion = selectedQuestions[questionIndex];
+            document.getElementById("question").innerText = currentQuestion.scenario;
+            document.getElementById("progress").innerText = `Hand ${questionIndex + 1} of 10`;
+
+            const btnContainer = document.getElementById("buttons");
+            btnContainer.innerHTML = "";
+
+            choices.forEach(choice => {
+                const btn = document.createElement("button");
+                btn.classList.add("btn", "btn-answer");
+                btn.innerText = choice;
+                btn.onclick = () => checkAnswer(choice);
+                btnContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(choice) {
+            if (choice === selectedQuestions[questionIndex].correctAnswer) {
+                score++;
+            }
+            document.getElementById("score").innerText = score;
+            questionIndex++;
+            setTimeout(loadNextQuestion, 1000);
+        }
+
+        startNewRound();
+    </script>
+
+</body>
+</html>
